@@ -1,0 +1,76 @@
+#!/bin/bash
+#
+#   $ ./build_spark
+#
+set -e
+set -u
+
+EXPECTED_ARGS=1
+E_BADARGS=65
+
+if [ $# -lt $EXPECTED_ARGS ]
+then
+  echo "Usage: `basename $0` {codename}"
+  exit ${E_BADARGS};
+fi
+
+name=spark-mesos
+CODENAME=$1
+VERSION=0.8.0
+DEB_BUILD_ARCH=`dpkg-architecture -qDEB_BUILD_ARCH`
+LICENSE="Apache License 2.0"
+description="Spark is an open source cluster computing system that aims to make data analytics fast — both fast to run and fast to write. To run programs faster, Spark provides primitives for in-memory cluster computing: your job can load data into memory and query it repeatedly much more quickly than with disk-based systems like Hadoop MapReduce."
+url="http://spark-project.org/"
+arch="${DEB_BUILD_ARCH}"
+section="misc"
+package_version=""
+origdir="$(pwd)"
+
+
+# add e.g. to ~/.bash_profile 'export MAINTAINER="your@email.com"'
+# if variable not set, use default value
+if [[ -z ${MAINTAINER+xxx} && "${MAINTAINER+xxx}" = "xxx" ]]; then
+  #variable is not set at all or it's empty
+  MAINTAINER="${USER}@localhost"
+fi
+
+#_ MAIN _#
+echo "removing ${name}*.deb"
+rm -rf ${name}*.deb
+mkdir -p tmp && pushd tmp
+
+#check dependencies
+DEPENDENCIES=(scala maven3)
+i=0
+expstatus="Status: install ok installed"
+for package in ${DEPENDENCIES[@]}
+do
+   status=`dpkg -s ${package} | grep Status:`
+   if [[ "${status}" != *"${expstatus}"* ]]; then
+     echo "missing package: ${package}"
+     i=$((i+1))
+   fi
+done
+if [[ i -gt 0 ]]; then
+  echo "please install missing dependencies"
+  exit 1
+fi
+
+REPO="spark"
+if [ ! -d ${REPO}/.git ]; then
+  rm -rf ${REPO}
+  git clone git://github.com/mesos/spark.git
+  cd ${REPO}
+else
+  cd ${REPO}
+  git pull
+  git --no-pager log --pretty=format:"%h%x09%an%x09%ad%x09%s" --decorate --graph > CHANGELOG
+fi
+#short hash tag for build identification
+LASTCOMMIT=`git rev-parse --short HEAD`
+
+
+mvn -DskipTests -Phadoop2,deb install
+
+
+
