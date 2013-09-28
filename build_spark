@@ -87,7 +87,7 @@ if [[ i -gt 0 ]]; then
   exit 1
 fi
 
-REPO="spark"
+REPO="incubator-spark"
 if [ ! -d ${REPO}/.git ]; then
   rm -rf ${REPO}
   git clone git://github.com/apache/incubator-spark.git
@@ -101,7 +101,10 @@ fi
 LASTCOMMIT=`git rev-parse --short HEAD`
 
 
-mvn -DskipTests -Phadoop2,deb install
+# for spark 0.7.3
+#mvn -DskipTests -Phadoop2,deb install
+# for spark 0.8.0
+mvn -Prepl-bin -Pdeb clean package
 
 
 
