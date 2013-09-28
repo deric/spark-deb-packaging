@@ -5,19 +5,50 @@
 set -e
 set -u
 
-EXPECTED_ARGS=1
+EXPECTED_ARGS=0
 E_BADARGS=65
 
 if [ $# -lt $EXPECTED_ARGS ]
 then
-  echo "Usage: `basename $0` {codename}"
+  echo "Usage: `basename $0`"
   exit ${E_BADARGS};
 fi
 
+function lsb_release_tag {
+  lsb_release --id --release | cut -d: -f2 | tr A-Z a-z | xargs | tr ' ' '/'
+}
+
+function get_codename {
+  case "$(lsb_release_tag)" in
+    ubuntu/*|debian/*)
+      lsb_release -c | cut -d: -f2 | tr A-Z a-z | xargs | tr ' ' '/'
+    ;;
+    centos/*|redhat/*)
+      err "not implemented yet"
+    ;;
+    *)                 err "Not sure how to configure logrotate for: $linux" ;;
+  esac
+}
+
+function architecture {
+  case "$(lsb_release_tag)" in
+    ubuntu/*|debian/*) dpkg-architecture -qDEB_BUILD_ARCH ;;
+    centos/*|redhat/*) arch ;;
+    *)                 err "Not sure how to determine arch for: $linux" ;;
+  esac
+}
+
+function get_system_info {
+  linux="$(lsb_release_tag)"            # <distro>/<version>, like ubuntu/12.10
+  arch="$(architecture)"          # In the format used to label distro packages
+  codename="$(get_codename)"
+}
+
+
 name=spark-mesos
-CODENAME=$1
+CODENAME="$(get_codename)"
 VERSION=0.8.0
-DEB_BUILD_ARCH=`dpkg-architecture -qDEB_BUILD_ARCH`
+DEB_BUILD_ARCH="$(architecture)"
 LICENSE="Apache License 2.0"
 description="Spark is an open source cluster computing system that aims to make data analytics fast — both fast to run and fast to write. To run programs faster, Spark provides primitives for in-memory cluster computing: your job can load data into memory and query it repeatedly much more quickly than with disk-based systems like Hadoop MapReduce."
 url="http://spark-project.org/"
