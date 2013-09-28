@@ -40,7 +40,7 @@ rm -rf ${name}*.deb
 mkdir -p tmp && pushd tmp
 
 #check dependencies
-DEPENDENCIES=(scala maven3)
+DEPENDENCIES=(scala maven)
 i=0
 expstatus="Status: install ok installed"
 for package in ${DEPENDENCIES[@]}
