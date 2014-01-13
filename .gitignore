@@ -1,3 +1,4 @@
 tmp/*
 incubator-spark/*
 *.deb
+deb/*

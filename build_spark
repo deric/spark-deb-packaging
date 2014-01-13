@@ -27,7 +27,7 @@ function main {
   checkout go
 }
 
-use_git_version=false
+use_git_version=true
 function maybe_append_git_hash {
   if $use_git_version && git rev-parse --git-dir &>/dev/null
   then out "$1-g$(git log -n1 --format=%h)"
@@ -142,16 +142,20 @@ function cleanup {
     rm "$this"/*.deb
   fi
   if [ -d "$this"/deb ]; then
+    echo "removing old deb directory"
     rm -rf "$this"/deb
   fi
 }
 
-function build {(
-  echo -e "building spark...\n"
+function build {
+  echo -e "checking scala...\n"
   cd "${this}/${repo}"
 
   FWDIR="$(cd `dirname $0`; pwd)"
   DISTDIR="$FWDIR/dist"
+
+  # Initialize defaults
+  SPARK_HADOOP_VERSION=1.0.4
 
   # Get version from SBT
   export TERM=dumb   # Prevents color codes in SBT output
@@ -167,7 +171,7 @@ function build {(
   VERSION=$(echo "${VERSIONSTRING}" | tail -1 | cut -f 2 | sed 's/^\([a-zA-Z0-9.-]*\).*/\1/')
   echo "Version is ${VERSION}"
 
-
+  echo -e "building spark...\n"
   "sbt/sbt" "assembly/assembly"
 
   # for spark 0.7.3
@@ -176,35 +180,20 @@ function build {(
   #mvn -Prepl-bin -Pdeb clean package
   #mvn install
 #  mvn -DskipTests install
-)}
+}
 
 function create_installation {(
-  cd ${this}
-  mkdir -p deb
-  cd deb
-  local assembly=`ls ${this}/${repo}/assembly/target/scala-*/*.jar`
-  cp "${assembly}" usr/share/spark
+  mkdir -p "${this}/deb"
+  cd "${this}/deb"
   mkdir -p usr/share/spark/conf
   mkdir -p usr/local/bin
   # framework dir
   FWDIR="${this}/${repo}"
-  DISTDIR="usr/share/spark"
-
-#  VERSIONSTRING=$($FWDIR/sbt/sbt "show version")
-
-#  if [ $? == -1 ] ;then
-#    echo -e "You need sbt installed and available on your path."
-#    echo -e "Download sbt from http://www.scala-sbt.org/"
-#    exit -1;
-#  fi
-
-# VERSION=$(echo "${VERSIONSTRING}" | tail -1 | cut -f 2 | sed 's/^\([a-zA-Z0-9.-]*\).*/\1/')
-#  echo "Version is ${VERSION}"
-
+  DISTDIR="${this}/deb/usr/share/spark"
 
   mkdir -p "$DISTDIR/jars"
-#  echo "Spark $VERSION built for Hadoop $SPARK_HADOOP_VERSION" > "$DISTDIR/RELEASE"
 
+  echo "Spark $VERSION built for Hadoop $SPARK_HADOOP_VERSION" > "$DISTDIR/RELEASE"
   # Copy jars
   cp $FWDIR/assembly/target/scala*/*assembly*hadoop*.jar "$DISTDIR/jars/"
 
@@ -220,8 +209,7 @@ function create_installation {(
   # mesos library
   echo "MESOS_NATIVE_LIBRARY=\"/usr/local/lib/libmesos.so\"" >> usr/share/spark/conf/spark-env.sh
   echo "curr dir: `pwd`"
-  #ln -s usr/share/spark/bin/spark-shell usr/local/bin/spark-shell
-  #ln -s usr/local/bin/spark-shell usr/share/spark/bin/spark-shell
+  cp "${this}/scripts/spark-shell" usr/local/bin/spark-shell
   sudo chown -R 0:0 .
 )}
 
@@ -231,7 +219,7 @@ function pkg {
   local opts=( -t deb
                -d 'java7-runtime-headless | java6-runtime-headless'
   )
-  fpm_ "${opts[@]}" -p "$this"/"$name-$version~$(get_codename)".deb
+  fpm_ "${opts[@]}" -p "$this"/"$name-$version.deb"
 
 }
 
@@ -249,7 +237,7 @@ function fpm_ {
                --vendor "Apache Spark"
                -m spark-dev@incubator.apache.org
                --prefix=/ )
-  ( cd deb && "$gem_bin"/fpm "${opts[@]}" "$@" -- . )
+  ( cd "${this}/deb" && "$gem_bin"/fpm "${opts[@]}" "$@" -- . )
 }
 
 function os_release {
