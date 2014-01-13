@@ -148,7 +148,7 @@ function cleanup {
 }
 
 function build {
-  msg -e "checking scala...\n"
+  msg "checking scala..."
   cd "${this}/${repo}"
 
   FWDIR="$(cd `dirname $0`; pwd)"
@@ -210,7 +210,6 @@ function create_installation {(
   echo "MESOS_NATIVE_LIBRARY=\"/usr/local/lib/libmesos.so\"" >> usr/share/spark/conf/spark-env.sh
   echo "curr dir: `pwd`"
   cp "${this}/scripts/spark-shell" usr/local/bin/spark-shell
-  sudo chown -R 0:0 .
 )}
 
 function pkg {
@@ -236,6 +235,7 @@ function fpm_ {
                --category misc
                --vendor "Apache Spark"
                -m spark-dev@incubator.apache.org
+               --after-install "$this/scripts/postinst.sh"
                --prefix=/ )
   ( cd "${this}/deb" && "$gem_bin"/fpm "${opts[@]}" "$@" -- . )
 }
