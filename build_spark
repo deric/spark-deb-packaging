@@ -126,7 +126,7 @@ function dependencies {
   do
     status=`dpkg -s ${package} | grep Status:`
    if [[ "${status}" != *"${expstatus}"* ]]; then
-     echo "missing package: ${package}"
+     err "missing package: ${package}"
      i=$((i+1))
    fi
   done
@@ -138,17 +138,17 @@ function dependencies {
 
 function cleanup {
   if [ -e "$this"/*.deb ];then
-    echo "removing old deb package"
+    msg "removing old deb package"
     rm "$this"/*.deb
   fi
   if [ -d "$this"/deb ]; then
-    echo "removing old deb directory"
+    msg "removing old deb directory"
     rm -rf "$this"/deb
   fi
 }
 
 function build {
-  echo -e "checking scala...\n"
+  msg -e "checking scala...\n"
   cd "${this}/${repo}"
 
   FWDIR="$(cd `dirname $0`; pwd)"
@@ -171,7 +171,7 @@ function build {
   VERSION=$(echo "${VERSIONSTRING}" | tail -1 | cut -f 2 | sed 's/^\([a-zA-Z0-9.-]*\).*/\1/')
   echo "Version is ${VERSION}"
 
-  echo -e "building spark...\n"
+  msg "building spark.."
   "sbt/sbt" "assembly/assembly"
 
   # for spark 0.7.3
