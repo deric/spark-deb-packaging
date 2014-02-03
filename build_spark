@@ -145,6 +145,10 @@ function cleanup {
     msg "removing old deb directory"
     rm -rf "$this"/deb
   fi
+  # remove all old jars, we want exactly one
+  if [ -d "$this/$repo" ]; then
+    find "$this/$repo/assembly/target" -type f -name *.jar -exec rm -f {} \;
+  fi
 }
 
 function build {
