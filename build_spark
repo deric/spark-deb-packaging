@@ -35,12 +35,12 @@ function maybe_append_git_hash {
   fi
 }
 
-repo=git://github.com/apache/incubator-spark.git
+repo=https://git-wip-us.apache.org/repos/asf/spark.git
 function checkout {
   local url=( $(url_split "$repo") )
   local repository="${url[0]}"
   local query="${url[1]:-}"
-  repo="incubator-spark"
+  repo="spark"
   if [[ ${url[2]:-} ]]
   then err "Setting fragment (#) does nothing. Try query (?) instead."
   fi
@@ -146,7 +146,7 @@ function cleanup {
     rm -rf "$this"/deb
   fi
   # remove all old jars, we want exactly one
-  if [ -d "$this/$repo" ]; then
+  if [ -d "$this/$repo/assembly/target" ]; then
     find "$this/$repo/assembly/target" -type f -name *.jar -exec rm -f {} \;
   fi
 }
