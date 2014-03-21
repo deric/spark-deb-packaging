@@ -165,7 +165,6 @@ function build {
   export TERM=dumb   # Prevents color codes in SBT output
 
   VERSIONSTRING=$($FWDIR/sbt/sbt "show version")
-
   if [ $? == -1 ] ;then
      echo -e "You need sbt installed and available on your path."
      echo -e "Download sbt from http://www.scala-sbt.org/"
@@ -200,7 +199,11 @@ function create_installation {(
   echo "Spark $VERSION built for Hadoop $SPARK_HADOOP_VERSION" > "$DISTDIR/RELEASE"
   # Copy jars
   cp $FWDIR/assembly/target/scala*/*assembly*hadoop*.jar "$DISTDIR/jars/"
-
+  local scala_version=$(ls $FWDIR/examples/target | grep scala-*)
+  mkdir -p "$DISTDIR/examples/src"
+  mkdir -p "$DISTDIR/examples/target/${scala_version}"
+  cp $FWDIR/examples/target/scala*/spark-examples-assembly*.jar "$DISTDIR/examples/target/${scala_version}"
+  cp -r $FWDIR/examples/src "$DISTDIR/examples/"
 
   cp "$FWDIR"/conf/fairscheduler.xml.template "$DISTDIR"/conf/fairscheduler.xml
   cp "$FWDIR"/conf/log4j.properties.template "$DISTDIR"/conf/log4j.properties
