@@ -194,11 +194,11 @@ function create_installation {(
   FWDIR="${this}/${repo}"
   DISTDIR="${this}/deb/usr/share/spark"
 
-  mkdir -p "$DISTDIR/jars"
+  mkdir -p "$DISTDIR/lib"
 
   echo "Spark $VERSION built for Hadoop $SPARK_HADOOP_VERSION" > "$DISTDIR/RELEASE"
   # Copy jars
-  cp $FWDIR/assembly/target/scala*/*assembly*hadoop*.jar "$DISTDIR/jars/"
+  cp $FWDIR/assembly/target/scala*/*assembly*hadoop*.jar "$DISTDIR/lib/"
   local scala_version=$(ls $FWDIR/examples/target | grep scala-*)
   mkdir -p "$DISTDIR/examples/src"
   mkdir -p "$DISTDIR/examples/target/${scala_version}"
