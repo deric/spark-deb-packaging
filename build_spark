@@ -202,7 +202,7 @@ function create_installation {(
   local scala_version=$(ls $FWDIR/examples/target | grep scala-*)
   mkdir -p "$DISTDIR/examples/src"
   mkdir -p "$DISTDIR/examples/target/${scala_version}"
-  cp $FWDIR/examples/target/scala*/spark-examples-assembly*.jar "$DISTDIR/lib"
+  cp $FWDIR/examples/target/scala*/spark-examples-*.jar "$DISTDIR/lib"
   cp -r $FWDIR/examples/src "$DISTDIR/examples/"
 
   cp "$FWDIR"/conf/fairscheduler.xml.template "$DISTDIR"/conf/fairscheduler.xml
