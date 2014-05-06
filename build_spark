@@ -209,6 +209,7 @@ function create_installation {(
   cp "$FWDIR"/conf/log4j.properties.template "$DISTDIR"/conf/log4j.properties
   cp "$FWDIR"/conf/metrics.properties.template "$DISTDIR"/conf/metrics.properties
   cp "$FWDIR"/conf/spark-env.sh.template "$DISTDIR"/conf/spark-env.sh
+  cp "${this}/scripts/java-opts" "${DISTDIR}/conf/java-opts"
   cp -r "$FWDIR/bin" "$DISTDIR"
   cp -r "$FWDIR/python" "$DISTDIR"
   cp -r "$FWDIR/sbin" "$DISTDIR"
