@@ -1,4 +1,4 @@
 #!/bin/bash
 
 FWDIR="$(cd /usr/share/spark; pwd)"
-exec ./bin/spark-shell "$@"
+exec ${FWDIR}/bin/spark-shell "$@"
