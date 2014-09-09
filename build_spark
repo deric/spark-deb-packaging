@@ -176,7 +176,7 @@ function build {
 
   msg "building spark.."
   "sbt/sbt" "assembly/assembly"
-
+  cd "${this}/${repo}/examples" && mvn package
   # for spark 0.7.3
   #mvn -DskipTests -Phadoop2,deb install
   # for spark 0.8.0
