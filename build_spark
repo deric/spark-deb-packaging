@@ -225,6 +225,7 @@ function pkg {
   local scripts="${linux%%/*}"
   local opts=( -t deb
                -d 'java7-runtime-headless | java6-runtime-headless'
+               -d 'libgfortran3'
   )
   fpm_ "${opts[@]}" -p "$this"/"$name-$version.deb"
 
